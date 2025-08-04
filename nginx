@@ -1,0 +1,3 @@
+add_header 'Access-Control-Allow-Origin' 'https://games.r7.bet.br';
+add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type';
