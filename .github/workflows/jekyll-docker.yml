@@ -1,0 +1,6 @@
+from sklearn.ensemble import IsolationForest
+
+# Modelo para detectar transações anômalas
+clf = IsolationForest(contamination=0.01)
+clf.fit(normal_transaction_data)
+anomalies = clf.predict(new_transactions)
